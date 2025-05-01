@@ -1,6 +1,6 @@
 {
   "name": "adarga",
-  "version": "1.0.2",
+  "version": "1.0.6",
   "description": "Shields assets for smix",
   "main": "index.js",
   "scripts": {
