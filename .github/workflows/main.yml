@@ -20,6 +20,23 @@ jobs:
         with:
           node-version: '20'
           registry-url: 'https://registry.npmjs.org/'
+          
+      - name: Bump version
+        run: |
+          # Get current version
+          CURRENT_VERSION=$(node -p "require('./package.json').version")
+          
+          # Split version into major, minor, patch
+          IFS='.' read -r major minor patch <<< "$CURRENT_VERSION"
+          
+          # Increment patch version
+          patch=$((patch + 1))
+          
+          # Create new version
+          NEW_VERSION="$major.$minor.$patch"
+          
+          # Update package.json with new version
+          npm version $NEW_VERSION --no-git-tag-version
 
       # Skip build and test steps since this is just static files
 
