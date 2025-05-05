@@ -1,29 +1,29 @@
-name: Publish Package to npm
+name: Publish Static Files to npm
 
 on:
+  # Publish when pushing to main branch
   push:
     branches: [main]
+  # Or when creating a new release
+  release:
+    types: [created]
 
 jobs:
   publish:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      
-      - uses: actions/setup-node@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
         with:
           node-version: '20'
-          
-      - run: npm install
-      
-      - run: npm test
-        continue-on-error: true
-        
-      - run: npm run build
-        # Remove if your package doesn't require a build step
-      
-      - uses: JS-DevTools/npm-publish@v3
-        with:
-          token: ${{ secrets.NPM_TOKEN }}
-          # Optional: Specify access level if your package is scoped
-          # access: public
+          registry-url: 'https://registry.npmjs.org/'
+
+      # Skip build and test steps since this is just static files
+
+      - name: Publish to npm
+        run: npm publish --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
