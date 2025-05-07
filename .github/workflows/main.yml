@@ -1,0 +1,53 @@
+name: Publish Static Files to npm
+
+on:
+  # Publish when pushing to main branch
+  push:
+    branches: [main]
+  # Or when creating a new release
+  release:
+    types: [created]
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          registry-url: 'https://registry.npmjs.org/'
+          
+      - name: Check latest published version and bump
+        run: |
+          # Get package name from package.json
+          PACKAGE_NAME=$(node -p "require('./package.json').name")
+          
+          # Get the latest published version from npm registry
+          LATEST_VERSION=$(npm view $PACKAGE_NAME version 2>/dev/null || echo "0.0.0")
+          echo "Latest published version: $LATEST_VERSION"
+          
+          # Parse the version components
+          IFS='.' read -r major minor patch <<< "$LATEST_VERSION"
+          
+          # Increment patch version
+          patch=$((patch + 1))
+          
+          # Create new version
+          NEW_VERSION="$major.$minor.$patch"
+          echo "New version will be: $NEW_VERSION"
+          
+          # Update package.json with new version
+          npm version $NEW_VERSION --no-git-tag-version --allow-same-version
+          
+          echo "Updated package.json to version $NEW_VERSION"
+
+      # Skip build and test steps since this is just static files
+
+      - name: Publish to npm
+        run: npm publish --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
